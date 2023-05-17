@@ -9,6 +9,8 @@ export interface ColumnType {
     type: 'text' | 'input';
     height?: number;
     style?: CSSProperties;
+    fontStyle?: CSSProperties;
+    value?: string;
 }
 
 export interface DragResultType {

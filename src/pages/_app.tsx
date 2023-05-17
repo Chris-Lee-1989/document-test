@@ -4,6 +4,8 @@ import { RecoilRoot } from 'recoil';
 import 'dayjs/locale/ko';
 import '@/styles/globals.css'
 import 'antd/dist/reset.css';
+import { DndProvider } from 'react-dnd';
+import { HTML5Backend } from 'react-dnd-html5-backend';
 
 export default function App({ Component, pageProps }: AppProps) {
   return (
@@ -16,7 +18,9 @@ export default function App({ Component, pageProps }: AppProps) {
           <meta httpEquiv="X-UA-Compatible" content="IE=edge" />
       </Head>
       <RecoilRoot>
-        <Component {...pageProps} />
+        <DndProvider backend={HTML5Backend}>
+          <Component {...pageProps} />
+        </DndProvider>
       </RecoilRoot>
     </>
 )

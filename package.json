@@ -15,7 +15,7 @@
     "@types/react": "18.2.6",
     "@types/react-dom": "18.2.4",
     "ahooks": "^3.7.7",
-    "antd": "^5.4.7",
+    "antd": "^5.5.0",
     "eslint": "8.40.0",
     "eslint-config-next": "13.4.2",
     "next": "13.4.2",
@@ -23,8 +23,12 @@
     "react-dnd": "^16.0.1",
     "react-dnd-html5-backend": "^16.0.1",
     "react-dom": "18.2.0",
+    "react-to-print": "^2.14.12",
     "recoil": "^0.7.7",
     "typescript": "5.0.4",
     "uuid": "^9.0.0"
+  },
+  "devDependencies": {
+    "@types/uuid": "^9.0.1"
   }
 }
