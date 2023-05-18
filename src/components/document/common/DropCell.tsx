@@ -10,7 +10,7 @@ interface Props {
 export default function DropCell({ item }: Props) {
 
     const [{ canDrop, isOver }, drop] = useDrop(() => ({
-        accept: 'drop',
+        accept: ['drop', 'overlay'],
         drop: () => item,
         collect: (monitor) => ({
           isOver: monitor.isOver(),

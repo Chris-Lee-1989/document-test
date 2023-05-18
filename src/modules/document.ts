@@ -66,18 +66,28 @@ export const onDeleteNewDocuPage = (page: number) => {
 }
 
 // 문서에 아이템 추가
-export const onAddItemNewDocuPage = (result: DropResultType) => {
+export const onAddItemNewDocuPage = (item: ItemType, result: DropResultType) => {
     if (typeof window !== 'undefined') {
         let docu = <DocuType>getNewDocu();
-        docu.page[docu.currentPage].items.push({
-            type: 'label',
-            uuid: v1(),
-            value: '',
-            rowNum: result.rowNum,
-            colNum: result.colNum,
-            width: 1,
-            height: 1,
-        });
+        docu.page[docu.currentPage].items.push(item);
+        onSaveNewDocu(docu);
+    }
+}
+
+// 문서에 아이템 이동
+export const onMoveItemNewDocuPage = (item: ItemType, result: DropResultType) => {
+    if (typeof window !== 'undefined') {
+        let docu = <DocuType>getNewDocu();
+        docu.page[docu.currentPage].items = docu.page[docu.currentPage].items.map((docuItem: ItemType) => {
+            if (item.uuid === docuItem.uuid) {
+                return {
+                    ...docuItem,
+                    colNum: result.colNum,
+                    rowNum: result.rowNum,
+                }
+            }
+            return docuItem;
+        })
         onSaveNewDocu(docu);
     }
 }
@@ -86,9 +96,11 @@ export const onAddItemNewDocuPage = (result: DropResultType) => {
 // 선택된 셀 가져오기
 export const getSelectedNewDocuCell = () => {
     if (typeof window !== 'undefined') {
-        let dataSet = localStorage.getItem('selected-new-document-cell');
-        if (dataSet) {
-            return <ItemType>JSON.parse(dataSet);
+        const uuid = localStorage.getItem('selected-new-document-cell');
+        if (uuid) {
+            const docu = <DocuType>getNewDocu();
+            const find = docu.page[docu.currentPage].items.find((item:ItemType) => item.uuid === uuid);
+            return <ItemType>find;
         } else {
             return undefined
         }
@@ -98,9 +110,9 @@ export const getSelectedNewDocuCell = () => {
 
 
 // 선택된 셀 설정하기
-export const setSelectedNewDocuCell = (item: ItemType) => {
+export const setSelectedNewDocuCell = (uuid: string) => {
     if (typeof window !== 'undefined') {
-        localStorage.setItem('selected-new-document-cell', JSON.stringify(item));
+        localStorage.setItem('selected-new-document-cell', uuid);
     }
 }
 
@@ -114,6 +126,5 @@ export const onChangeSelected = (key: string, value: any) => {
         }
         return item;
     });
-    setSelectedNewDocuCell(selected);
     onSaveNewDocu(docu);
 }

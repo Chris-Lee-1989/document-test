@@ -1,14 +1,15 @@
-import React, { useState } from 'react'
+import React, { useRef, useState } from 'react'
 import DocumentGrid from '../common/DocumentGrid';
 import DocumentOverlay from '../common/DocumentOverlay';
 import DocumentTools from '../common/DocumentTools';
-import { DocuType, DropResultType } from '@/types/documentTypes';
+import { DocuType, DropResultType, ItemType } from '@/types/documentTypes';
 import { Button, Typography } from 'antd';
 import { CloseOutlined, PlusOutlined } from '@ant-design/icons';
 import { blue, green, red } from '@ant-design/colors';
 import { v1 } from "uuid";
 import { useUpdate } from 'ahooks';
-import { getNewDocu, getSelectedNewDocuCell, onAddItemNewDocuPage, onAddNewDocuPage, onDeleteNewDocuPage, onSetNewDocuPage } from '@/modules/document';
+import { getNewDocu, getSelectedNewDocuCell, onAddItemNewDocuPage, onAddNewDocuPage, onDeleteNewDocuPage, onMoveItemNewDocuPage, onSetNewDocuPage, setSelectedNewDocuCell } from '@/modules/document';
+import { useClickAway } from 'ahooks';
 
 interface Props {
     offsetX?: number;
@@ -17,7 +18,7 @@ interface Props {
 }
 
 export default function Index({ offsetX=0, offsetY=0, height } : Props) {
-
+    
     // 강제 렌더링
     const forceRendering = useUpdate();
 
@@ -27,30 +28,33 @@ export default function Index({ offsetX=0, offsetY=0, height } : Props) {
     // 문서 데이터
     const docu = getNewDocu();
 
-    // 선택된 셀
-    const selectedCell = getSelectedNewDocuCell();
-
     return (
         <>
             <div className="container">
-                <DocumentGrid 
-                    offsetX={offsetX}
-                    offsetY={offsetY}
-                    columns={docu.page[docu.currentPage].columns}
-                    rows={docu.page[docu.currentPage].rows}
-                    height={height - 30} 
-                    width={width} 
-                />
-                <DocumentOverlay
-                    offsetX={offsetX}
-                    offsetY={offsetY}
-                    columns={docu.page[docu.currentPage].columns}
-                    rows={docu.page[docu.currentPage].rows}
-                    height={height - 30} 
-                    width={width} 
-                    data={docu.page[docu.currentPage].items}
-                    forceRendering={() => forceRendering()}
-                />
+                <div style={{position: 'absolute'}}>
+                    <DocumentGrid 
+                        offsetX={offsetX}
+                        offsetY={offsetY}
+                        columns={docu.page[docu.currentPage].columns}
+                        rows={docu.page[docu.currentPage].rows}
+                        height={height - 30} 
+                        width={width} 
+                    />
+                    <DocumentOverlay
+                        offsetX={offsetX}
+                        offsetY={offsetY}
+                        columns={docu.page[docu.currentPage].columns}
+                        rows={docu.page[docu.currentPage].rows}
+                        height={height - 30} 
+                        width={width} 
+                        data={docu.page[docu.currentPage].items}
+                        forceRendering={() => forceRendering()}
+                        onDrop={(item: ItemType, result: DropResultType) => {
+                            onMoveItemNewDocuPage(item, result);
+                            forceRendering();
+                        }}
+                    />
+                </div>
                 <div className="grid">
                     <div className="pagination">
                     {
@@ -93,8 +97,8 @@ export default function Index({ offsetX=0, offsetY=0, height } : Props) {
                     </div>
                 </div>
                 <DocumentTools 
-                    onDrop={(result: DropResultType) => {
-                        onAddItemNewDocuPage(result);
+                    onDrop={(item: ItemType, result: DropResultType) => {
+                        onAddItemNewDocuPage(item, result);
                         forceRendering();
                     }}
                     columns={docu.page[docu.currentPage].columns}

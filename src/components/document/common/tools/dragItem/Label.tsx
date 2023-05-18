@@ -5,10 +5,11 @@ import { useDrag } from 'react-dnd';
 import { useRecoilState } from 'recoil';
 import isDragState from '@/atoms/document/isDragState';
 import { useUpdateEffect } from 'ahooks';
-import { DropResultType } from '@/types/documentTypes';
+import { DropResultType, ItemType } from '@/types/documentTypes';
+import { v1 } from 'uuid';
 
 interface Props {
-    onDrop: (result: DropResultType) => void;
+    onDrop: (item: ItemType, result: DropResultType) => void;
 }
 export default function Label({ onDrop }: Props) {
 
@@ -16,12 +17,27 @@ export default function Label({ onDrop }: Props) {
 
     const [{ isDragging }, drag] = useDrag(() => ({
         type: 'drop',
-        item: { 
-
-        },
+        item: undefined,
         end: (item, monitor) => {
             const result = monitor.getDropResult<DropResultType>();
-            if (result) onDrop(result);
+            if (result) {
+                onDrop(
+                    {
+                        type: 'label',
+                        uuid: v1(),
+                        value: '',
+                        width: 1,
+                        height: 1,
+                        rowNum: result.rowNum, 
+                        colNum: result.colNum,
+                        textAlign: 'left',
+                        verticalAlign: 'top',
+                        borderColor: '#222222FF',
+                        backgroundColor: '#FFFFFFFF',
+                    }, 
+                    result
+                );
+            }
         },
         collect: (monitor) => {
             return ({

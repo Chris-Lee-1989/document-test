@@ -13,14 +13,18 @@ interface CommonItemType {
     height: number;
 
     borderColor?: string;
-    border?: [number, number, number, number ];
+    borderLeft?: boolean;
+    borderRight?: boolean;
+    borderTop?: boolean;
+    borderBottom?: boolean;
 
     backgroundColor?: string;
 
+    color?: string; 
     fontSize?: number;
-    textAlign?: string;
+    textAlign?: "left" | "center" | "right" | undefined;
+    verticalAlign?: "top" | "middle" | "bottom" | undefined;
     fontWeight?: number;
-
 }
 
 // 라벨 아이템

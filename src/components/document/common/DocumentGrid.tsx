@@ -90,7 +90,7 @@ export default function DocumentGrid({ width, height, columns, rows, offsetX, of
                 grid-template-columns: repeat(${columns}, 1fr);
             }
 
-            .grid > .item {border: 0.5px solid #eee;}
+            .grid > .item {border: 1px solid #eee;}
             .grid > .item.body {display: flex; align-items: center; justify-content: center; flex-direction: column;}
             `}</style>
         </>
