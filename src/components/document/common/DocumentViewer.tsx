@@ -8,74 +8,32 @@ import { Input, Typography } from 'antd';
 import { useDrag, useDrop, DragPreviewImage } from 'react-dnd';
 import { useKeyPress, useUpdateEffect } from 'ahooks';
 
+
 interface Props {
     width: number;
     height: number;
     columns: number;
     rows: number;
-    offsetX: number;
-    offsetY: number;
     data: ItemType[];
-    forceRendering: () => void;
-    onDrop: (item: ItemType, result: DropResultType) => void;
 }
 
-export default function DocumentOverlay({ width, height, columns, rows, offsetX, offsetY, data, forceRendering, onDrop }: Props) {
 
-    useKeyPress('ctrl.c', () => {
-        onCopyItem();
-    });
-
-    useKeyPress('ctrl.v', () => {
-        onPasteItem();
-        forceRendering();
-    });
-
-    useKeyPress('delete', () => {
-        onDeleteItem();
-        forceRendering();
-    });
-
-    const [isDrag, setDrag] = useRecoilState(isDragState);
+export default function DocumentOverlay({ width, height, columns, rows, data}: Props) {
 
     // 셀 1칸 너비
     const cellWidth = (width / columns);
     const cellHeight = (height / rows);
-
-    const [{ canDrop, isOver }, drop] = useDrop(() => ({
-        accept: ['resize'],
-        drop: () => {
-            
-        },
-        hover(item: ItemType, monitor) {
-            const offset = monitor.getDifferenceFromInitialOffset();
-            if (offset && item) {
-                const addWidth = Math.round(offset.x/cellWidth);
-                const addHeight = Math.round(offset.y/cellHeight);
-                onChangeCell(item.uuid, 'width', (item.width + addWidth));
-                onChangeCell(item.uuid, 'height', (item.height + addHeight));
-                forceRendering();
-            }
-        },
-        collect: (monitor) => ({
-          isOver: monitor.isOver(),
-          canDrop: monitor.canDrop(),
-        }),
-    }), [cellWidth, cellHeight]);
-
     return (
         <>
-            <div className="container" ref={drop}>
+            <div className="container">
                 <div className="grid">
                 {
                     data.map((item: ItemType, idx: number) => {
                         return (
-                            <OverlayCell 
+                            <ViewerCell
                                 key={idx}
                                 cellWidth={cellWidth}
                                 item={item}
-                                forceRendering={forceRendering}
-                                onDrop={onDrop}
                             />
                         )
                     })
@@ -84,16 +42,11 @@ export default function DocumentOverlay({ width, height, columns, rows, offsetX,
             </div>
             <style jsx>{`
             .container {
-                opacity: 1;
-                z-index: ${isDrag ? 499 : 501};
-                opacity: 1;
-                position: absolute; top: ${offsetY}px; left: ${offsetX}px;
                 width: ${width}px; height: ${height}px;
             }
 
             .grid {
                 transition: 300ms;
-                position: absolute; top: 0; left: 0;
                 width: ${width}px; height: ${height}px;
                 display: grid;
                 grid-template-rows: repeat(${rows}, 1fr);
@@ -101,6 +54,7 @@ export default function DocumentOverlay({ width, height, columns, rows, offsetX,
             }
 
             .grid > .item {border: 0.5px solid #bbb; background: rgba(0,0,0,0); cursor: pointer;}
+
             `}</style>
         </>
     )
@@ -112,59 +66,24 @@ export default function DocumentOverlay({ width, height, columns, rows, offsetX,
 
 
 
-
-
-
-
-
-
-
-
-interface OverlayCellProps {
+interface ViewerCellProps {
     item: ItemType;
     cellWidth: number;
-    forceRendering: () => void;
-    onDrop: (item: ItemType, result: DropResultType) => void;
 }   
-const OverlayCell = ({ item, cellWidth, forceRendering, onDrop }: OverlayCellProps) => {
+const ViewerCell = ({ item, cellWidth }: ViewerCellProps) => {
 
-    const [isDrag, setDrag] = useRecoilState(isDragState);
-
-    // 선택된 셀
-    const selectedCell = getSelectedNewDocuCell();
-
-    const isSelected = item.uuid === selectedCell?.uuid;
     const gridRowStart = item.rowNum + 1;
     const gridRowEnd = item.rowNum + 1 + Number(item.height);
     const gridColumnStart = item.colNum + 1;
     const gridColumnEnd = item.colNum + 1 + Number(item.width);
 
-    const [{ isDragging }, drag] = useDrag(() => ({
-        type: 'overlay',
-        item: item,
-        end: (item, monitor) => {
-            const result = monitor.getDropResult<DropResultType>();
-            if (result) onDrop(item, result);
-        },
-        collect: (monitor) => {
-            return ({
-                isDragging: monitor.isDragging(),
-                handlerId: monitor.getHandlerId(),
-            })
-        },
-    }), [item, cellWidth]);
-
-    useUpdateEffect(() => {
-        setDrag(isDragging);
-    }, [isDragging])
-
-    const opacity = isDragging ? 0.4 : 1;
     const setBorder = (isBorder: boolean | undefined) => {
         return isBorder ? `1px solid ${item.borderColor ? item.borderColor.slice(0, 7) : '#222'}` : 0;
     }
 
     // 마우스 오버 여부
     const [isHover, setHover] = useState(false);
+
     // 셀 REF
     const position = (() => {
         if (typeof window !== 'undefined') {
@@ -181,10 +100,8 @@ const OverlayCell = ({ item, cellWidth, forceRendering, onDrop }: OverlayCellPro
             <div
                 onMouseEnter={() => setHover(true)}
                 onMouseLeave={() => setHover(false)}
-                ref={drag}
                 className={`item uuid-${item.uuid}`}
                 style={{
-                    opacity: opacity,
                     gridRowStart,
                     gridRowEnd,
                     gridColumnStart,
@@ -199,12 +116,6 @@ const OverlayCell = ({ item, cellWidth, forceRendering, onDrop }: OverlayCellPro
                     borderBottom: setBorder(item.borderBottom),
                     display: 'flex',
                     alignItems: item.verticalAlign === 'top' ? 'flex-start' : item.verticalAlign === 'middle' ? 'center' : item.verticalAlign === 'bottom' ? 'flex-end' : 'flex-start',
-                }}
-                onClick={() => {
-                    setSelectedNewDocuCell(item.uuid);
-                    forceRendering();
-                    const target: any = document.querySelector('#selected-value-input');
-                    if (target) setTimeout(() => target.select(), 50);
                 }}
             >
                 <div>
@@ -238,12 +149,6 @@ const OverlayCell = ({ item, cellWidth, forceRendering, onDrop }: OverlayCellPro
                         <></>
                 }
                 </div>
-                {
-                    isHover && 
-                    <div className="resize-mark">
-                        <ResizeMark item={item} />
-                    </div>
-                }
             </div>
                 
             <style jsx>{`
@@ -260,43 +165,3 @@ const OverlayCell = ({ item, cellWidth, forceRendering, onDrop }: OverlayCellPro
 
 
 
-
-
-
-
-
-
-
-
-
-interface ResizeMarkProps {
-    item: ItemType;
-}
-const ResizeMark = ({ item }: ResizeMarkProps) => {
-
-    const [{ isDragging }, drag, preview] = useDrag(() => ({
-        type: 'resize',
-        item: item,
-        end: (item, monitor) => {
-            
-        },
-        collect: (monitor) => {
-            return ({
-                isDragging: monitor.isDragging(),
-                handlerId: monitor.getHandlerId(),
-            })
-        },
-    }), [item]);
-    
-    return (
-        <>
-            <DragPreviewImage connect={preview} src={'/resize.png'} />
-            <div ref={drag} className="container">
-
-            </div>
-            <style jsx>{`
-            .container { width: 20px; height: 20px; border: 10px solid rgba(0,0,0,0); border-right: 10px solid ${ isDragging ? 'rgba(0,0,0,0)' : blue[4]}; transform: rotate(225deg);}
-            `}</style>
-        </>
-    )
-}

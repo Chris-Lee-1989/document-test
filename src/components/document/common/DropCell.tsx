@@ -16,7 +16,7 @@ export default function DropCell({ item }: Props) {
           isOver: monitor.isOver(),
           canDrop: monitor.canDrop(),
         }),
-    }));
+    }), [item]);
 
     const isActive = canDrop && isOver
     let backgroundColor = 'rgba(255,255,255,0.1)';

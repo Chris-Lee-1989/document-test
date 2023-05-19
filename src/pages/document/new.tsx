@@ -1,7 +1,7 @@
 import React from 'react'
 import dynamic from 'next/dynamic';
 import { useSize } from 'ahooks';
-const NewDocument = dynamic(() => import('@/components/document/new/Index'), { ssr: false, });
+const NewDocument = dynamic(() => import('@/components/document/New'), { ssr: false, });
 
 export default function Page() {
 
@@ -11,8 +11,7 @@ export default function Page() {
         <>
             <div className="wrap">
                 <NewDocument 
-                    // height={500}
-                    height={size ? size.height : 0}
+                    height={size ? (size.height - 30) : 0}
                 />
             </div>
             <style jsx>{`

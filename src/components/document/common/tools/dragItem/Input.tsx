@@ -1,4 +1,4 @@
-import { MediumOutlined, MediumWorkmarkOutlined } from '@ant-design/icons';
+import { FormOutlined, MediumOutlined, MediumWorkmarkOutlined } from '@ant-design/icons';
 import { Button } from 'antd';
 import React from 'react'
 import { useDrag } from 'react-dnd';
@@ -23,10 +23,13 @@ export default function Label({ onDrop }: Props) {
             if (result) {
                 onDrop(
                     {
-                        type: 'label',
+                        type: 'input',
+                        placeholder: '입력해주세요',
+                        key: '',
+
                         uuid: v1(),
                         value: '',
-                        width: 1,
+                        width: 3,
                         height: 1,
                         rowNum: result.rowNum, 
                         colNum: result.colNum,
@@ -61,7 +64,7 @@ export default function Label({ onDrop }: Props) {
     return (
         <>
             <div className="container" ref={drag}>
-                <Button icon={<MediumOutlined />}>라벨</Button>
+                <Button icon={<FormOutlined />}>입력창</Button>
             </div>
             <style jsx>{`
             

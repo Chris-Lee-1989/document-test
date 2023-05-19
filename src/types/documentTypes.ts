@@ -22,9 +22,14 @@ interface CommonItemType {
 
     color?: string; 
     fontSize?: number;
+    fontWeight: '400' | 'bold'
     textAlign?: "left" | "center" | "right" | undefined;
     verticalAlign?: "top" | "middle" | "bottom" | undefined;
-    fontWeight?: number;
+    
+    isBold?: boolean;
+    isUnderline?: boolean;
+    isItalic?: boolean;
+    isStrikethrough?: boolean;
 }
 
 // 라벨 아이템
@@ -39,6 +44,8 @@ export interface TextAreaItemType extends CommonItemType {
 // 입력창 아이템
 export interface InputItemType extends CommonItemType {
     type: 'input';
+    key: string;
+    placeholder?: string;
 }
 
 // 아이템 타입
